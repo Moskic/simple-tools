@@ -180,13 +180,10 @@ a {
   border: 1px dashed var(--line);
   border-radius: var(--radius);
   color: var(--muted);
-  text-align: center;
-}
-
-.noscript-message {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.7;
+  text-align: center;
 }
 
 .site-footer {
