@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Simple Tools — 一个轻量、实用的在线工具集合。"
+    />
+    <title>Tools | moskic.com</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="tools.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="./" aria-label="Simple Tools 首页">
+          <span>Simple Tools</span>
+        </a>
+        <button class="language-toggle" id="language-toggle" type="button"></button>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="page-title">
+          <h1 id="page-title"></h1>
+        </section>
+
+        <section class="tools-section" aria-labelledby="tools-title">
+          <div class="section-heading">
+            <h2 id="tools-title"></h2>
+            <p class="tool-count" id="tool-count" aria-live="polite"></p>
+          </div>
+
+          <div class="tool-grid" id="tool-grid"></div>
+
+          <noscript>
+            <p class="noscript-message">
+              请启用 JavaScript 以查看工具列表。 / Please enable JavaScript to view the tools.
+            </p>
+          </noscript>
+        </section>
+      </main>
+
+      <footer class="site-footer" aria-label="Site footer">
+        <span class="footer-site-name">Simple Tools</span>
+        <span aria-hidden="true">/</span>
+        <a href="https://moskic.com">moskic.com</a>
+        <span aria-hidden="true">/</span>
+        <span id="footer-year"></span>
+        <span aria-hidden="true">/</span>
+        <time id="footer-time"></time>
+      </footer>
+    </div>
+  </body>
+</html>

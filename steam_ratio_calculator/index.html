@@ -3,87 +3,138 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Steam Market Ratio Calculator</title>
+  <title>Steam Ratio | moskic.com</title>
   <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
-      margin: 0;
-      background: #f4f6f8;
-      color: #1f2937;
+    :root {
+      color-scheme: light;
+      --background: #fafafa;
+      --surface: #ffffff;
+      --surface-hover: #f7f7f7;
+      --text: #202020;
+      --muted: #707070;
+      --line: #e5e5e5;
+      --accent: #222222;
+      --radius: 12px;
     }
 
-    .container {
-      max-width: 900px;
-      margin: 32px auto;
-      padding: 24px;
-      position: relative;
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+    }
+
+    .page-shell {
+      width: min(900px, calc(100% - 40px));
+      margin: 0 auto;
+      padding-bottom: 34px;
+    }
+
+    .site-header {
+      display: flex;
+      min-height: 92px;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      color: var(--text);
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-decoration: none;
     }
 
     .lang-switch {
-      position: fixed;
-      top: 18px;
-      right: 18px;
-      z-index: 10;
-      width: auto;
-      padding: 10px 14px;
-      border: none;
-      border-radius: 999px;
-      background: #111827;
-      color: white;
-      font-size: 14px;
-      font-weight: 700;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      color: var(--text);
       cursor: pointer;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background-color 150ms ease;
     }
 
     .lang-switch:hover {
-      background: #374151;
+      background: var(--surface-hover);
+    }
+
+    .container {
+      padding: 36px 0 64px;
     }
 
     .card {
-      background: white;
-      border-radius: 16px;
+      margin-bottom: 16px;
       padding: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-      margin-bottom: 20px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
     }
 
     .title-row {
       display: flex;
       align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
+      gap: 14px;
+      margin-bottom: 14px;
     }
 
     .steam-logo {
-      width: 36px;
-      height: 36px;
+      width: 34px;
+      height: 34px;
       flex: 0 0 auto;
     }
 
     h1 {
       margin: 0;
-      font-size: 28px;
+      font-size: clamp(1.7rem, 4vw, 2.25rem);
+      font-weight: 650;
+      letter-spacing: -0.04em;
+      line-height: 1.2;
     }
 
     h2 {
-      font-size: 20px;
-      margin-top: 0;
+      margin: 0 0 20px;
+      font-size: 1.15rem;
+      letter-spacing: -0.02em;
     }
 
     label {
       display: block;
-      font-weight: 600;
       margin: 14px 0 6px;
+      font-size: 0.88rem;
+      font-weight: 600;
     }
 
     input {
       width: 100%;
-      padding: 12px;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      font-size: 16px;
-      box-sizing: border-box;
+      padding: 11px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--background);
+      color: var(--text);
+      font: inherit;
+      font-size: 0.95rem;
+      transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    input:focus {
+      border-color: var(--text);
+      box-shadow: 0 0 0 3px rgba(32, 32, 32, 0.08);
+      outline: none;
     }
 
     .grid {
@@ -95,32 +146,46 @@
     .main-button {
       width: 100%;
       margin-top: 18px;
-      padding: 14px 18px;
-      border: none;
-      border-radius: 12px;
-      background: #2563eb;
+      padding: 12px 18px;
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      background: var(--accent);
       color: white;
-      font-size: 16px;
-      font-weight: 700;
       cursor: pointer;
+      font: inherit;
+      font-size: 0.95rem;
+      font-weight: 650;
+      transition: opacity 150ms ease;
     }
 
     .main-button:hover {
-      background: #1d4ed8;
+      opacity: 0.86;
     }
 
     .result {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      padding: 16px;
       margin-top: 16px;
-      line-height: 1.8;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--background);
+      font-size: 0.92rem;
+      line-height: 1.75;
+    }
+
+    .result:empty {
+      display: none;
+    }
+
+    .result hr {
+      margin: 12px 0;
+      border: 0;
+      border-top: 1px solid var(--line);
     }
 
     .big {
-      font-size: 24px;
-      font-weight: 800;
+      margin-top: 4px;
+      font-size: 1.25rem;
+      font-weight: 700;
     }
 
     .good {
@@ -136,15 +201,56 @@
     }
 
     .note {
-      color: #6b7280;
-      font-size: 14px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
       line-height: 1.7;
     }
 
+    .note + .note {
+      margin-top: 16px;
+    }
+
     code {
-      background: #eef2ff;
+      background: var(--background);
       padding: 2px 6px;
-      border-radius: 6px;
+      border: 1px solid var(--line);
+      border-radius: 5px;
+      color: var(--text);
+      white-space: normal;
+    }
+
+    .site-footer {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      padding-top: 34px;
+      color: #686d76;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+
+    .footer-site-name,
+    .site-footer a {
+      color: #161719;
+    }
+
+    .site-footer a {
+      text-decoration: none;
+    }
+
+    .site-footer a:hover {
+      color: #0071e3;
+    }
+
+    .brand:focus-visible,
+    .lang-switch:focus-visible,
+    .main-button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
     }
 
     @media (max-width: 700px) {
@@ -153,30 +259,39 @@
       }
 
       .container {
-        margin: 0;
-        padding: 16px;
+        padding: 28px 0 48px;
       }
 
-      .lang-switch {
-        top: 12px;
-        right: 12px;
+      .site-header {
+        min-height: 76px;
       }
 
-      .steam-logo {
-        width: 32px;
-        height: 32px;
+      .card {
+        padding: 20px;
       }
 
       h1 {
-        font-size: 24px;
+        font-size: 1.65rem;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        transition-duration: 0.01ms !important;
       }
     }
   </style>
 </head>
 <body>
-  <button id="langSwitch" class="lang-switch" onclick="toggleLanguage()">EN</button>
+  <div class="page-shell">
+    <header class="site-header">
+      <a class="brand" href="../" aria-label="Simple Tools 首页">Simple Tools</a>
+      <button id="langSwitch" class="lang-switch" type="button" onclick="toggleLanguage()">EN</button>
+    </header>
 
-  <div class="container">
+    <main class="container">
     <div class="card">
       <div class="title-row">
         <img
@@ -271,6 +386,17 @@
         这只是计算工具，不代表饰品价格不会波动，也不代表一定能卖出。
       </p>
     </div>
+    </main>
+
+    <footer class="site-footer" aria-label="Site footer">
+      <span class="footer-site-name">Steam Ratio Calculator</span>
+      <span aria-hidden="true">/</span>
+      <a href="https://moskic.com">moskic.com</a>
+      <span aria-hidden="true">/</span>
+      <span id="footerYear"></span>
+      <span aria-hidden="true">/</span>
+      <time id="footerTime"></time>
+    </footer>
   </div>
 
   <script>
@@ -388,7 +514,7 @@
 
     function applyLanguage() {
       document.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
-      document.title = t("pageTitle");
+      document.title = "Steam Ratio | moskic.com";
       document.getElementById("langSwitch").textContent = t("switchText");
 
       document.querySelectorAll("[data-i18n]").forEach(el => {
@@ -537,7 +663,24 @@
       `;
     }
 
+    function updateFooterClock() {
+      const now = new Date();
+      const time = new Intl.DateTimeFormat("en", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit"
+      }).format(now);
+
+      document.getElementById("footerYear").textContent = new Intl.DateTimeFormat("en", {
+        year: "numeric"
+      }).format(now);
+      document.getElementById("footerTime").textContent = time;
+      document.getElementById("footerTime").setAttribute("datetime", now.toISOString());
+    }
+
     applyLanguage();
+    updateFooterClock();
+    setInterval(updateFooterClock, 1000);
   </script>
 </body>
 </html>
