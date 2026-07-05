@@ -33,7 +33,7 @@ a {
 }
 
 .page-shell {
-  width: min(1160px, calc(100% - 40px));
+  width: min(900px, calc(100% - 40px));
   margin: 0 auto;
   padding-bottom: 34px;
 }
@@ -227,7 +227,7 @@ a {
 
 @media (max-width: 560px) {
   .page-shell {
-    width: min(100% - 28px, 1160px);
+    width: min(100% - 28px, 900px);
   }
 
   .site-header {
