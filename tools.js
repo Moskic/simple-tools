@@ -13,6 +13,13 @@ const tools = [
     descriptionZh: "将照片处理为 WIDE Evo 认可的格式，通过 TF 卡直接打印，绕过手机传图压缩并解锁更高打印分辨率。",
     url: "./wide_evo_print_quality_unlock/",
   },
+  {
+    name: "Base64 Encoder & Decoder",
+    nameZh: "Base64 编码与解码",
+    description: "Encode text as Base64 or decode Base64 back to readable text, entirely in your browser.",
+    descriptionZh: "在浏览器本地将文本编码为 Base64，或将 Base64 解码为可读文本。",
+    url: "./base64_encode_decode/",
+  },
 ];
 
 const toolGrid = document.querySelector("#tool-grid");

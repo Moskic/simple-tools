@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="在浏览器本地进行 Base64 编码与解码。" />
+    <title>Base64 编码与解码 | moskic.com</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="../" aria-label="Simple Tools 首页">Simple Tools</a>
+        <button class="lang-switch" id="langSwitch" type="button">EN</button>
+      </header>
+
+      <main class="container">
+        <section class="card intro-card">
+          <h1 data-i18n="title">Base64 编码与解码</h1>
+          <p class="note" data-i18n="intro">
+            将文本编码为 Base64，或将 Base64 解码为原文。所有内容仅在浏览器本地处理，不会上传。
+          </p>
+        </section>
+
+        <section class="card tool-card" aria-labelledby="toolTitle">
+          <h2 id="toolTitle" data-i18n="toolTitle">转换内容</h2>
+
+          <label for="input" data-i18n="inputLabel">输入</label>
+          <textarea id="input" rows="8" data-i18n-placeholder="inputPlaceholder" placeholder="输入要编码的文本，或要解码的 Base64…" spellcheck="false"></textarea>
+
+          <div class="actions">
+            <button class="button primary" id="encodeButton" type="button" data-i18n="encode">编码为 Base64</button>
+            <button class="button" id="decodeButton" type="button" data-i18n="decode">解码 Base64</button>
+            <button class="button quiet" id="clearButton" type="button" data-i18n="clear">清空</button>
+          </div>
+
+          <div class="output-heading">
+            <label for="output" data-i18n="outputLabel">结果</label>
+            <button class="text-button" id="copyButton" type="button" data-i18n="copy">复制结果</button>
+          </div>
+          <textarea id="output" rows="8" data-i18n-placeholder="outputPlaceholder" placeholder="转换结果将显示在这里" readonly spellcheck="false"></textarea>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+        </section>
+      </main>
+
+      <footer class="site-footer" aria-label="Site footer">
+        <span class="footer-site-name">Base64 Encoder &amp; Decoder</span>
+        <span aria-hidden="true">/</span>
+        <a href="https://moskic.com">moskic.com</a>
+        <span aria-hidden="true">/</span>
+        <span id="footerYear"></span>
+        <span aria-hidden="true">/</span>
+        <time id="footerTime"></time>
+      </footer>
+    </div>
+  </body>
+</html>
