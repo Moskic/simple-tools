@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WIDE Evo 打印画质解锁 | moskic.com</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="page-shell">
+        <header class="site-header">
+            <a class="brand" href="../" aria-label="Simple Tools 首页">Simple Tools</a>
+            <button id="langSwitch" class="lang-switch" type="button" onclick="app.toggleLanguage()">EN</button>
+        </header>
+
+        <main class="container">
+        <section class="card intro-card">
+            <div class="title-row">
+                <img class="fujifilm-logo" src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/fujifilm.svg" alt="Fujifilm">
+                <h1 data-i18n="title">WIDE Evo 打印画质解锁</h1>
+            </div>
+            <p class="note" data-i18n="intro">在浏览器本地将照片处理为 2560 × 1920 JPEG，并写入 WIDE Evo 认可的文件格式与来源校验信息，使其可从 TF 卡直接打印，绕过手机传图压缩，解锁约提升一倍分辨率的隐藏打印画质；全程在本地处理，没有任何数据将会被上传。</p>
+        </section>
+
+        <section class="card">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📷</div>
+                <p data-i18n="uploadPrompt">拖拽照片到这里，或点击选择文件</p>
+                <p class="hint" data-i18n="uploadHint">支持 JPG、PNG、WebP 等格式</p>
+                <input type="file" id="fileInput" accept="image/*" multiple hidden>
+            </div>
+
+            <div class="options">
+                <label>
+                    <span data-i18n="prefixLabel">输出文件名前缀</span>
+                    <input type="text" id="prefix" value="DSCF" maxlength="10">
+                </label>
+                <label>
+                    <span data-i18n="startIndexLabel">起始编号</span>
+                    <input type="number" id="startIndex" value="1" min="1" max="9999">
+                </label>
+            </div>
+
+            <div class="queue" id="queue"></div>
+
+            <div class="actions" id="actions" style="display: none;">
+                <button id="processBtn" class="btn primary" data-i18n="processAll">处理所有照片</button>
+                <button id="clearBtn" class="btn" data-i18n="clearList">清空列表</button>
+            </div>
+
+            <div class="results" id="results"></div>
+        </section>
+
+        <section class="card acknowledgement">
+            <h2 data-i18n="thanksTitle">致谢与改进</h2>
+            <p class="note"><span data-i18n="thanksBefore">感谢</span> <a href="http://evo.hacktheworld.cn/" target="_blank" rel="noopener noreferrer">evo.hacktheworld.cn</a><span data-i18n="thanksAfter"> 提供的原版工具。本版本修复了文件名脚本注入、批量处理内存占用、临时图片 URL 泄漏和重复处理问题，并统一了 Simple Tools 的界面风格。</span></p>
+        </section>
+        </main>
+
+        <footer class="site-footer" aria-label="Site footer">
+            <span class="footer-site-name">WIDE Evo Print Quality Unlock</span>
+            <span aria-hidden="true">/</span>
+            <a href="https://moskic.com">moskic.com</a>
+            <span aria-hidden="true">/</span>
+            <span id="footerYear"></span>
+            <span aria-hidden="true">/</span>
+            <time id="footerTime"></time>
+        </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="exif-template.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

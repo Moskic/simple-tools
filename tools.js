@@ -6,6 +6,13 @@ const tools = [
     descriptionZh: "计算外部平台买入饰品后在 Steam 市场卖出的到账余额、手续费和挂刀比例。",
     url: "./steam_ratio_calculator/",
   },
+  {
+    name: "WIDE Evo Print Quality Unlock",
+    nameZh: "WIDE Evo 打印画质解锁",
+    description: "Prepare photos for direct TF card printing on WIDE Evo to bypass phone-transfer compression and unlock higher print resolution.",
+    descriptionZh: "将照片处理为 WIDE Evo 认可的格式，通过 TF 卡直接打印，绕过手机传图压缩并解锁更高打印分辨率。",
+    url: "./wide_evo_print_quality_unlock/",
+  },
 ];
 
 const toolGrid = document.querySelector("#tool-grid");
