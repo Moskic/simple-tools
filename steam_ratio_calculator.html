@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Steam Market Ratio Calculator</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f8;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    .lang-switch {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 10;
+      width: auto;
+      padding: 10px 14px;
+      border: none;
+      border-radius: 999px;
+      background: #111827;
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+    }
+
+    .lang-switch:hover {
+      background: #374151;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .title-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .steam-logo {
+      width: 36px;
+      height: 36px;
+      flex: 0 0 auto;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 28px;
+    }
+
+    h2 {
+      font-size: 20px;
+      margin-top: 0;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin: 14px 0 6px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .main-button {
+      width: 100%;
+      margin-top: 18px;
+      padding: 14px 18px;
+      border: none;
+      border-radius: 12px;
+      background: #2563eb;
+      color: white;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .main-button:hover {
+      background: #1d4ed8;
+    }
+
+    .result {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      line-height: 1.8;
+    }
+
+    .big {
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    .good {
+      color: #15803d;
+    }
+
+    .normal {
+      color: #ca8a04;
+    }
+
+    .bad {
+      color: #dc2626;
+    }
+
+    .note {
+      color: #6b7280;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    code {
+      background: #eef2ff;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    @media (max-width: 700px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        margin: 0;
+        padding: 16px;
+      }
+
+      .lang-switch {
+        top: 12px;
+        right: 12px;
+      }
+
+      .steam-logo {
+        width: 32px;
+        height: 32px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button id="langSwitch" class="lang-switch" onclick="toggleLanguage()">EN</button>
+
+  <div class="container">
+    <div class="card">
+      <div class="title-row">
+        <img
+          class="steam-logo"
+          src="https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/steam.svg"
+          alt="Steam"
+        />
+        <h1 data-i18n="title">Steam 挂刀比例计算器</h1>
+      </div>
+
+      <p class="note" data-i18n="intro">
+        适合计算：外部平台买入饰品后，挂到 Steam 市场卖出，实际换到多少 Steam 钱包余额，以及你的挂刀比例。
+        默认按 CS2 常见费用：Steam 5% + 游戏特定费用 10%。
+      </p>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="section1">① 已知 Steam 买家支付价，计算到账和比例</h2>
+
+      <div class="grid">
+        <div>
+          <label data-i18n="cashCost">外部现金买入价</label>
+          <input id="cashCost" type="number" step="0.01" value="68" />
+        </div>
+
+        <div>
+          <label data-i18n="buyerPays">Steam 买家支付价 / 挂售价</label>
+          <input id="buyerPays" type="number" step="0.01" value="100" />
+        </div>
+
+        <div>
+          <label data-i18n="steamRate">Steam 费率（%）</label>
+          <input id="steamRate" type="number" step="0.01" value="5" />
+        </div>
+
+        <div>
+          <label data-i18n="gameRate">游戏特定费率（%）</label>
+          <input id="gameRate" type="number" step="0.01" value="10" />
+        </div>
+
+        <div>
+          <label data-i18n="minFee">最低单项手续费</label>
+          <input id="minFee" type="number" step="0.01" value="0.01" />
+        </div>
+
+        <div>
+          <label data-i18n="exchangeRate">Steam 到现金折算系数</label>
+          <input id="exchangeRate" type="number" step="0.0001" value="1" />
+        </div>
+      </div>
+
+      <button class="main-button" onclick="calculateRatio()" data-i18n="calcRatioBtn">
+        计算挂刀比例
+      </button>
+
+      <div id="ratioResult" class="result"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="section2">② 已知想到账多少，反推需要挂多少钱</h2>
+
+      <div class="grid">
+        <div>
+          <label data-i18n="targetReceive">希望 Steam 到账余额</label>
+          <input id="targetReceive" type="number" step="0.01" value="86.97" />
+        </div>
+      </div>
+
+      <button class="main-button" onclick="calculateRequiredPrice()" data-i18n="reverseBtn">
+        反推买家支付价
+      </button>
+
+      <div id="reverseResult" class="result"></div>
+    </div>
+
+    <div class="card">
+      <h2 data-i18n="formulaTitle">公式说明</h2>
+
+      <p class="note" data-i18n="formulaIntro">
+        本页面按最小货币单位计算，例如人民币就是“分”。设 R 为卖家到账金额，S 为 Steam 费率，G 为游戏费率：
+      </p>
+
+      <p class="note">
+        <code data-i18n="formula1">Steam手续费 = max(floor(R × S), 最低手续费)</code><br>
+        <code data-i18n="formula2">游戏手续费 = max(floor(R × G), 最低手续费)</code><br>
+        <code data-i18n="formula3">买家支付价 = R + Steam手续费 + 游戏手续费</code><br>
+        <code data-i18n="formula4">挂刀比例 = 外部现金买入价 ÷ Steam到账余额</code>
+      </p>
+
+      <p class="note" data-i18n="riskNote">
+        判断参考：比例越低越划算。一般来说，0.80 以下比较低，0.80–0.90 属于常见区间，0.90 以上优势较小。
+        这只是计算工具，不代表饰品价格不会波动，也不代表一定能卖出。
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const translations = {
+      zh: {
+        pageTitle: "Steam 挂刀比例计算器",
+        switchText: "EN",
+
+        title: "Steam 挂刀比例计算器",
+        intro: "适合计算：外部平台买入饰品后，挂到 Steam 市场卖出，实际换到多少 Steam 钱包余额，以及你的挂刀比例。默认按 CS2 常见费用：Steam 5% + 游戏特定费用 10%。",
+
+        section1: "① 已知 Steam 买家支付价，计算到账和比例",
+        cashCost: "外部现金买入价",
+        buyerPays: "Steam 买家支付价 / 挂售价",
+        steamRate: "Steam 费率（%）",
+        gameRate: "游戏特定费率（%）",
+        minFee: "最低单项手续费",
+        exchangeRate: "Steam 到现金折算系数",
+        calcRatioBtn: "计算挂刀比例",
+
+        section2: "② 已知想到账多少，反推需要挂多少钱",
+        targetReceive: "希望 Steam 到账余额",
+        reverseBtn: "反推买家支付价",
+
+        formulaTitle: "公式说明",
+        formulaIntro: "本页面按最小货币单位计算，例如人民币就是“分”。设 R 为卖家到账金额，S 为 Steam 费率，G 为游戏费率：",
+        formula1: "Steam手续费 = max(floor(R × S), 最低手续费)",
+        formula2: "游戏手续费 = max(floor(R × G), 最低手续费)",
+        formula3: "买家支付价 = R + Steam手续费 + 游戏手续费",
+        formula4: "挂刀比例 = 外部现金买入价 ÷ Steam到账余额",
+        riskNote: "判断参考：比例越低越划算。一般来说，0.80 以下比较低，0.80–0.90 属于常见区间，0.90 以上优势较小。这只是计算工具，不代表饰品价格不会波动，也不代表一定能卖出。",
+
+        buyerPaysResult: "Steam 买家支付价",
+        actualReceive: "Steam 实际可对应到账",
+        steamFee: "Steam 手续费",
+        gameFee: "游戏手续费",
+        totalFee: "总手续费",
+        exactBuyerPays: "精确对应买家支付价",
+        gapTip: "提示：该价格存在 {gap} 的最小单位差异，已按不超过买家支付价的最高到账计算。",
+        cashCostResult: "外部现金买入价",
+        steamCashValue: "Steam 到现金折算后价值",
+        ratio: "挂刀比例",
+        approxDiscount: "约等于 {discount} 折",
+        good: "比例较好，成本比较低。",
+        normal: "比例一般，可以接受但要看物品流动性。",
+        bad: "比例偏高，优势不明显。",
+        veryBad: "比例 ≥ 1，通常不划算。",
+
+        targetReceiveResult: "希望到账",
+        requiredBuyerPays: "需要设置买家支付价"
+      },
+
+      en: {
+        pageTitle: "Steam Market Ratio Calculator",
+        switchText: "中文",
+
+        title: "Steam Market Ratio Calculator",
+        intro: "Use this to calculate how much Steam Wallet balance you receive after buying an item externally and selling it on the Steam Community Market. Default CS2-style fees: 5% Steam fee + 10% game-specific fee.",
+
+        section1: "① Calculate received balance and ratio from buyer payment",
+        cashCost: "External cash cost",
+        buyerPays: "Steam buyer payment / listing price",
+        steamRate: "Steam fee rate (%)",
+        gameRate: "Game-specific fee rate (%)",
+        minFee: "Minimum fee per category",
+        exchangeRate: "Steam-to-cash conversion factor",
+        calcRatioBtn: "Calculate ratio",
+
+        section2: "② Reverse-calculate required listing price",
+        targetReceive: "Target Steam Wallet received",
+        reverseBtn: "Calculate required buyer payment",
+
+        formulaTitle: "Formula",
+        formulaIntro: "This page calculates using the smallest currency unit, such as cents. Let R be the seller's received amount, S be the Steam fee rate, and G be the game-specific fee rate:",
+        formula1: "Steam fee = max(floor(R × S), minimum fee)",
+        formula2: "Game fee = max(floor(R × G), minimum fee)",
+        formula3: "Buyer payment = R + Steam fee + game fee",
+        formula4: "Ratio = external cash cost ÷ Steam Wallet received",
+        riskNote: "Reference only: lower ratios are better. Below 0.80 is usually strong, 0.80–0.90 is common, and above 0.90 has less advantage. This tool does not guarantee that prices will stay stable or that the item will sell.",
+
+        buyerPaysResult: "Steam buyer payment",
+        actualReceive: "Estimated Steam Wallet received",
+        steamFee: "Steam fee",
+        gameFee: "Game-specific fee",
+        totalFee: "Total fee",
+        exactBuyerPays: "Exact matched buyer payment",
+        gapTip: "Note: this price has a smallest-unit gap of {gap}; the highest received amount not exceeding the buyer payment is used.",
+        cashCostResult: "External cash cost",
+        steamCashValue: "Steam value after conversion",
+        ratio: "Ratio",
+        approxDiscount: "{discount}% of Steam value",
+        good: "Good ratio; relatively low cost.",
+        normal: "Average ratio; acceptable, but check item liquidity.",
+        bad: "High ratio; limited advantage.",
+        veryBad: "Ratio ≥ 1; usually not worth it.",
+
+        targetReceiveResult: "Target received",
+        requiredBuyerPays: "Required buyer payment"
+      }
+    };
+
+    let currentLang = getInitialLanguage();
+
+    function getInitialLanguage() {
+      const saved = localStorage.getItem("steamCalcLang");
+      if (saved === "zh" || saved === "en") return saved;
+
+      const browserLang = navigator.language || navigator.userLanguage || "en";
+      return browserLang.toLowerCase().startsWith("zh") ? "zh" : "en";
+    }
+
+    function t(key) {
+      return translations[currentLang][key] || key;
+    }
+
+    function applyLanguage() {
+      document.documentElement.lang = currentLang === "zh" ? "zh-CN" : "en";
+      document.title = t("pageTitle");
+      document.getElementById("langSwitch").textContent = t("switchText");
+
+      document.querySelectorAll("[data-i18n]").forEach(el => {
+        const key = el.getAttribute("data-i18n");
+        el.textContent = t(key);
+      });
+
+      calculateRatio();
+      calculateRequiredPrice();
+    }
+
+    function toggleLanguage() {
+      currentLang = currentLang === "zh" ? "en" : "zh";
+      localStorage.setItem("steamCalcLang", currentLang);
+      applyLanguage();
+    }
+
+    function toMinorUnit(value) {
+      const num = Number(value);
+      if (!Number.isFinite(num) || num < 0) return 0;
+      return Math.round(num * 100);
+    }
+
+    function fromMinorUnit(value) {
+      return (value / 100).toFixed(2);
+    }
+
+    function getSettings() {
+      return {
+        steamRate: Number(document.getElementById("steamRate").value) / 100,
+        gameRate: Number(document.getElementById("gameRate").value) / 100,
+        minFeeMinor: toMinorUnit(document.getElementById("minFee").value),
+        exchangeRate: Number(document.getElementById("exchangeRate").value) || 1
+      };
+    }
+
+    function calculateFeesFromReceive(receiveMinor, settings) {
+      if (receiveMinor <= 0) {
+        return {
+          steamFee: 0,
+          gameFee: 0,
+          totalFee: 0,
+          buyerPays: 0
+        };
+      }
+
+      const steamFee = settings.steamRate > 0
+        ? Math.max(Math.floor(receiveMinor * settings.steamRate + 1e-9), settings.minFeeMinor)
+        : 0;
+
+      const gameFee = settings.gameRate > 0
+        ? Math.max(Math.floor(receiveMinor * settings.gameRate + 1e-9), settings.minFeeMinor)
+        : 0;
+
+      return {
+        steamFee,
+        gameFee,
+        totalFee: steamFee + gameFee,
+        buyerPays: receiveMinor + steamFee + gameFee
+      };
+    }
+
+    function findReceiveFromBuyerPays(buyerPaysMinor, settings) {
+      let left = 0;
+      let right = buyerPaysMinor;
+      let bestReceive = 0;
+      let bestFees = calculateFeesFromReceive(0, settings);
+
+      while (left <= right) {
+        const mid = Math.floor((left + right) / 2);
+        const fees = calculateFeesFromReceive(mid, settings);
+
+        if (fees.buyerPays <= buyerPaysMinor) {
+          bestReceive = mid;
+          bestFees = fees;
+          left = mid + 1;
+        } else {
+          right = mid - 1;
+        }
+      }
+
+      return {
+        receive: bestReceive,
+        ...bestFees
+      };
+    }
+
+    function getRatioComment(ratio) {
+      if (ratio <= 0) return "";
+      if (ratio < 0.8) return `<span class="good">${t("good")}</span>`;
+      if (ratio <= 0.9) return `<span class="normal">${t("normal")}</span>`;
+      if (ratio < 1) return `<span class="bad">${t("bad")}</span>`;
+      return `<span class="bad">${t("veryBad")}</span>`;
+    }
+
+    function calculateRatio() {
+      const settings = getSettings();
+
+      const cashCostMinor = toMinorUnit(document.getElementById("cashCost").value);
+      const buyerPaysMinor = toMinorUnit(document.getElementById("buyerPays").value);
+
+      const result = findReceiveFromBuyerPays(buyerPaysMinor, settings);
+
+      const steamReceivedValueInCash = (result.receive / 100) * settings.exchangeRate;
+      const cashCost = cashCostMinor / 100;
+      const ratio = steamReceivedValueInCash > 0 ? cashCost / steamReceivedValueInCash : 0;
+
+      const exactBuyerPays = result.buyerPays;
+      const unusedGap = buyerPaysMinor - exactBuyerPays;
+
+      let ratioText = "";
+      if (currentLang === "zh") {
+        ratioText = `${ratio.toFixed(4)}，${t("approxDiscount").replace("{discount}", (ratio * 10).toFixed(2))}`;
+      } else {
+        ratioText = `${ratio.toFixed(4)}, ${t("approxDiscount").replace("{discount}", (ratio * 100).toFixed(2))}`;
+      }
+
+      document.getElementById("ratioResult").innerHTML = `
+        <div>${t("buyerPaysResult")}：<strong>${fromMinorUnit(buyerPaysMinor)}</strong></div>
+        <div>${t("actualReceive")}：<strong>${fromMinorUnit(result.receive)}</strong></div>
+        <div>${t("steamFee")}：${fromMinorUnit(result.steamFee)}</div>
+        <div>${t("gameFee")}：${fromMinorUnit(result.gameFee)}</div>
+        <div>${t("totalFee")}：${fromMinorUnit(result.totalFee)}</div>
+        <div>${t("exactBuyerPays")}：${fromMinorUnit(exactBuyerPays)}</div>
+        ${unusedGap > 0 ? `<div>${t("gapTip").replace("{gap}", fromMinorUnit(unusedGap))}</div>` : ""}
+        <hr>
+        <div>${t("cashCostResult")}：<strong>${fromMinorUnit(cashCostMinor)}</strong></div>
+        <div>${t("steamCashValue")}：<strong>${steamReceivedValueInCash.toFixed(2)}</strong></div>
+        <div class="big">${t("ratio")}：${ratioText}</div>
+        <div>${getRatioComment(ratio)}</div>
+      `;
+    }
+
+    function calculateRequiredPrice() {
+      const settings = getSettings();
+      const targetReceiveMinor = toMinorUnit(document.getElementById("targetReceive").value);
+
+      const fees = calculateFeesFromReceive(targetReceiveMinor, settings);
+
+      document.getElementById("reverseResult").innerHTML = `
+        <div>${t("targetReceiveResult")}：<strong>${fromMinorUnit(targetReceiveMinor)}</strong></div>
+        <div>${t("steamFee")}：${fromMinorUnit(fees.steamFee)}</div>
+        <div>${t("gameFee")}：${fromMinorUnit(fees.gameFee)}</div>
+        <div>${t("totalFee")}：${fromMinorUnit(fees.totalFee)}</div>
+        <div class="big">${t("requiredBuyerPays")}：${fromMinorUnit(fees.buyerPays)}</div>
+      `;
+    }
+
+    applyLanguage();
+  </script>
+</body>
+</html>
