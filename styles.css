@@ -145,7 +145,6 @@ a {
 
 .card-number {
   position: relative;
-  margin-bottom: auto;
   color: var(--muted);
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
