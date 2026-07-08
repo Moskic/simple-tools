@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="根据执照等级、目标安全分、场次权重和赛道弯角数，估算 iRacing 比赛的事故点数风险。"
+    />
+    <title>iRacing 安全分风险估算器 | moskic.com</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="../" aria-label="Simple Tools 首页">Simple Tools</a>
+        <button class="lang-switch" id="langSwitch" type="button">EN</button>
+      </header>
+
+      <main class="container">
+        <section class="card intro-card" aria-labelledby="pageTitle">
+          <h1 id="pageTitle" data-i18n="title">iRacing 安全分风险估算器</h1>
+          <p class="note" data-i18n="intro">
+            用社区常见的推断方式，估算一场比赛大概能承受多少事故点数。适合赛前风险判断，不用于精确预测赛后安全分涨跌。
+          </p>
+        </section>
+
+        <div class="primary-grid">
+          <section class="card" aria-labelledby="inputTitle">
+            <h2 id="inputTitle" data-i18n="inputTitle">输入参数</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label for="license" data-i18n="licenseLabel">执照等级</label>
+                <p class="helper" id="licenseHelp" data-i18n="licenseHelp">等级越高，维持同样安全分通常需要跑得越干净。</p>
+                <select id="license" aria-describedby="licenseHelp">
+                  <option value="Rookie" data-i18n="licenseRookie">Rookie 新手</option>
+                  <option value="D" data-i18n="licenseD">D 级</option>
+                  <option value="C" data-i18n="licenseC">C 级</option>
+                  <option value="B" data-i18n="licenseB" selected>B 级</option>
+                  <option value="A" data-i18n="licenseA">A 级</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="targetSr" data-i18n="targetSrLabel">目标安全分</label>
+                <p class="helper" id="targetSrHelp" data-i18n="targetSrHelp">选择用于判断的安全分目标；估算器支持 2.00–4.00。</p>
+                <div class="range-row">
+                  <input id="targetSrRange" type="range" min="2" max="4" value="3" step="0.01" aria-label="目标安全分滑块" />
+                  <input id="targetSr" type="number" min="2" max="4" value="3.00" step="0.01" aria-describedby="targetSrHelp promotionNotice" />
+                </div>
+                <p class="promotion-notice" id="promotionNotice"></p>
+              </div>
+
+              <div class="field">
+                <label for="sessionType" data-i18n="sessionLabel">排名场次类型</label>
+                <p class="helper" id="sessionHelp" data-i18n="sessionHelp">以下权重适用于会影响安全分的 Ranked 场次。</p>
+                <select id="sessionType" aria-describedby="sessionHelp">
+                  <option value="race" data-weight="1.00" selected></option>
+                  <option value="heat" data-weight="1.00"></option>
+                  <option value="warmup" data-weight="0.50"></option>
+                  <option value="openQualify" data-weight="0.50"></option>
+                  <option value="openPractice" data-weight="0.50"></option>
+                  <option value="timeTrial" data-weight="0.35"></option>
+                  <option value="loneQualify" data-weight="0.35"></option>
+                  <option value="lonePractice" data-weight="0.35"></option>
+                  <option value="unranked" data-weight="0.00"></option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label for="cornersPerLap" data-i18n="cornersLabel">每圈弯角系数</label>
+                <p class="helper" id="cornersHelp" data-i18n="cornersHelp">iRacing 为赛道配置定义的弯角计算值，不一定等于肉眼数出的弯道数量。</p>
+                <input id="cornersPerLap" type="number" min="1" max="100" step="1" value="15" aria-describedby="cornersHelp" />
+              </div>
+
+              <div class="field">
+                <label for="laps" data-i18n="lapsLabel">场次圈数</label>
+                <p class="helper" id="lapsHelp" data-i18n="lapsHelp">本场预计完成的圈数。</p>
+                <input id="laps" type="number" min="1" max="500" step="1" value="20" aria-describedby="lapsHelp" />
+              </div>
+
+              <div class="field">
+                <label for="incidents" data-i18n="incidentsLabel">本场事故点数（x）</label>
+                <p class="helper" id="incidentsHelp" data-i18n="incidentsHelp">例如比赛结束显示 4x，这里填 4。</p>
+                <input id="incidents" type="number" min="0" step="1" value="4" aria-describedby="incidentsHelp" />
+              </div>
+
+              <div class="field">
+                <label for="safetyLaps" data-i18n="safetyLapsLabel">安全余量（圈）</label>
+                <p class="helper" id="safetyLapsHelp" data-i18n="safetyLapsHelp">预留一点余量，避免刚好卡在红线。</p>
+                <input id="safetyLaps" type="number" min="0" max="10" step="0.5" value="1" aria-describedby="safetyLapsHelp" />
+              </div>
+
+              <div class="field">
+                <label for="roundMode" data-i18n="roundModeLabel">显示方式</label>
+                <p class="helper" id="roundModeHelp" data-i18n="roundModeHelp">保守模式会把建议事故点数向下取整。</p>
+                <select id="roundMode" aria-describedby="roundModeHelp">
+                  <option value="floor" data-i18n="roundFloor" selected>保守：向下取整</option>
+                  <option value="raw" data-i18n="roundRaw">显示小数</option>
+                </select>
+              </div>
+            </div>
+
+            <p class="form-error" id="formError" role="alert" aria-live="assertive"></p>
+            <div class="actions">
+              <button class="button primary" id="calcBtn" type="button" data-i18n="calculate">计算风险</button>
+              <button class="button" id="saveBtn" type="button" data-i18n="save">保存默认值</button>
+              <button class="button quiet" id="resetBtn" type="button" data-i18n="reset">恢复示例</button>
+            </div>
+            <p class="note compact" data-i18n="calculationNote">
+              安全分与近期历史中的弯角数和事故点数有关，因此结果只适合判断风险。
+            </p>
+          </section>
+
+          <section class="card results-card" aria-labelledby="resultTitle">
+            <h2 id="resultTitle" data-i18n="resultTitle">估算结果</h2>
+            <div class="results" aria-live="polite">
+              <div class="metric">
+                <span class="metric-name" data-i18n="targetCpiName">目标干净标准</span>
+                <strong class="metric-value" id="targetCpi">—</strong>
+                <span class="metric-hint" data-i18n="targetCpiHint">平均多少个弯出现 1 个事故点，越高越严格。</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="weightName">场次事故权重</span>
+                <strong class="metric-value" id="sessionWeightDisplay">—</strong>
+                <span class="metric-hint" data-i18n="weightHint">正式比赛为 1.00；数值越小，影响越小。</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="cornersName">本场计算弯角数</span>
+                <strong class="metric-value" id="effectiveCorners">—</strong>
+                <span class="metric-hint" data-i18n="effectiveCornersHint">比赛圈数 × 每圈弯角数</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="weightedIncidentsName">本场有效事故点</span>
+                <strong class="metric-value" id="weightedIncidents">—</strong>
+                <span class="metric-hint" data-i18n="weightedIncidentsHint">实际事故点数 × 场次事故权重</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="raceCpiName">本场干净程度</span>
+                <strong class="metric-value" id="raceCpi">—</strong>
+                <span class="metric-hint" data-i18n="raceCpiHint">弯角数 ÷（事故点数 × 场次权重）；0x 显示为无限大。</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="allowedName">估算事故点阈值</span>
+                <strong class="metric-value" id="allowedIncidents">—</strong>
+                <span class="metric-hint" data-i18n="allowedHint">在当前目标和安全余量下推算的事故点参考值。</span>
+              </div>
+            </div>
+            <div class="status-box" id="statusBox" role="status">填好参数后点击计算。</div>
+            <div class="pill-row" id="quickTips" aria-label="快速提示"></div>
+          </section>
+        </div>
+
+        <section class="reference-grid">
+          <article class="card">
+            <h2 data-i18n="cpiTableTitle">推断参考表</h2>
+            <div class="table-scroll" tabindex="0">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" data-i18n="tableLicense">执照等级</th>
+                    <th scope="col" data-i18n="srTwo">安全分 2.00</th>
+                    <th scope="col" data-i18n="srThree">安全分 3.00</th>
+                    <th scope="col" data-i18n="srFour">安全分 4.00</th>
+                  </tr>
+                </thead>
+                <tbody id="cpiTable"></tbody>
+              </table>
+            </div>
+            <p class="note" data-i18n="cpiTableNote">数字表示平均多少个弯对应 1 个有效事故点。</p>
+          </article>
+
+          <article class="card">
+            <h2 data-i18n="sessionTableTitle">不同场次对安全分的影响</h2>
+            <div class="table-scroll" tabindex="0">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col" data-i18n="sessionTypeHeader">场次类型</th>
+                    <th scope="col" data-i18n="weightHeader">权重</th>
+                  </tr>
+                </thead>
+                <tbody id="sessionTable"></tbody>
+              </table>
+            </div>
+            <p class="source-note"><span data-i18n="sourceLabel">场次权重参考：</span><a href="https://ir-core-sites.iracing.com/members/pdfs/20260310-official_sporting_code_dated_Mar_10_2026.pdf" target="_blank" rel="noreferrer">iRacing Official Sporting Code 2026.03.10</a></p>
+          </article>
+        </section>
+
+        <section class="reference-grid">
+          <article class="card">
+            <h2 data-i18n="glossaryTitle">名词解释</h2>
+            <ul class="explain-list" id="glossaryList"></ul>
+          </article>
+          <article class="card">
+            <h2 data-i18n="usageTitle">怎么用</h2>
+            <div class="usage-copy" id="usageCopy"></div>
+            <p class="note" data-i18n="disclaimer">非官方估算工具。实际变化还会受到个人历史记录、赛道配置和安全分整数区间变化等因素影响。</p>
+          </article>
+        </section>
+      </main>
+
+      <footer class="site-footer" aria-label="Site footer">
+        <span class="footer-site-name">iRacing Safety Rating Estimator</span>
+        <span aria-hidden="true">/</span>
+        <a href="https://moskic.com">moskic.com</a>
+        <span aria-hidden="true">/</span>
+        <span id="footerYear"></span>
+        <span aria-hidden="true">/</span>
+        <time id="footerTime"></time>
+      </footer>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

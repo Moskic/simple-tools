@@ -14,6 +14,13 @@ const tools = [
     url: "./wide_evo_print_quality_unlock/",
   },
   {
+    name: "iRacing Safety Rating Risk Estimator",
+    nameZh: "iRacing 安全分风险估算器",
+    description: "Estimate weighted incident points and session risk from license class, target Safety Rating, session type, laps, and track corner multiplier.",
+    descriptionZh: "根据执照等级、目标安全分、场次类型、圈数和赛道弯角系数，估算有效事故点与场次风险。",
+    url: "./iracing_safety_rating_estimator/",
+  },
+  {
     name: "Base64 Encoder & Decoder",
     nameZh: "Base64 编码与解码",
     description: "Encode text as Base64 or decode Base64 back to readable text, entirely in your browser.",
