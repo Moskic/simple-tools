@@ -220,10 +220,11 @@
       }
     };
 
+    const LANGUAGE_KEY = "simple-tools-language";
     let currentLang = getInitialLanguage();
 
     function getInitialLanguage() {
-      const saved = localStorage.getItem("steamCalcLang");
+      const saved = localStorage.getItem(LANGUAGE_KEY);
       if (saved === "zh" || saved === "en") return saved;
 
       const browserLang = navigator.language || navigator.userLanguage || "en";
@@ -250,7 +251,7 @@
 
     function toggleLanguage() {
       currentLang = currentLang === "zh" ? "en" : "zh";
-      localStorage.setItem("steamCalcLang", currentLang);
+      localStorage.setItem(LANGUAGE_KEY, currentLang);
       applyLanguage();
     }
 

@@ -7,7 +7,7 @@ const CLEANNESS_TABLE = {
 };
 
 const STORAGE_KEY = "iracing-safety-rating-estimator-v3";
-const LANGUAGE_KEY = "iracing-safety-rating-estimator-language";
+const LANGUAGE_KEY = "simple-tools-language";
 const FIELD_IDS = [
   "license", "targetSr", "sessionType", "cornersPerLap",
   "laps", "incidents", "safetyLaps", "roundMode",

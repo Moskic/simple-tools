@@ -47,10 +47,11 @@ const input = document.getElementById("input");
 const output = document.getElementById("output");
 const status = document.getElementById("status");
 const langSwitch = document.getElementById("langSwitch");
+const LANGUAGE_KEY = "simple-tools-language";
 let currentLanguage = getInitialLanguage();
 
 function getInitialLanguage() {
-  const saved = localStorage.getItem("base64ToolLang");
+  const saved = localStorage.getItem(LANGUAGE_KEY);
   if (saved === "zh" || saved === "en") return saved;
   return (navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en";
 }
@@ -141,7 +142,7 @@ document.getElementById("copyButton").addEventListener("click", async () => {
 
 langSwitch.addEventListener("click", () => {
   currentLanguage = currentLanguage === "zh" ? "en" : "zh";
-  localStorage.setItem("base64ToolLang", currentLanguage);
+  localStorage.setItem(LANGUAGE_KEY, currentLanguage);
   applyLanguage();
 });
 

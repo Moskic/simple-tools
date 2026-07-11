@@ -32,6 +32,7 @@ const tools = [
 const toolGrid = document.querySelector("#tool-grid");
 const toolCount = document.querySelector("#tool-count");
 const languageToggle = document.querySelector("#language-toggle");
+const LANGUAGE_KEY = "simple-tools-language";
 
 const translations = {
   zh: {
@@ -50,7 +51,13 @@ const translations = {
   },
 };
 
-let currentLanguage = navigator.language.toLowerCase().startsWith("zh") ? "zh" : "en";
+let currentLanguage = getInitialLanguage();
+
+function getInitialLanguage() {
+  const saved = localStorage.getItem(LANGUAGE_KEY);
+  if (saved === "zh" || saved === "en") return saved;
+  return (navigator.language || "en").toLowerCase().startsWith("zh") ? "zh" : "en";
+}
 
 function createElement(tagName, className, text) {
   const element = document.createElement(tagName);
@@ -104,6 +111,7 @@ function renderPage() {
 
 languageToggle.addEventListener("click", () => {
   currentLanguage = currentLanguage === "zh" ? "en" : "zh";
+  localStorage.setItem(LANGUAGE_KEY, currentLanguage);
   renderPage();
 });
 

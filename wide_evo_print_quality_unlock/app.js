@@ -51,6 +51,8 @@ const translations = {
     }
 };
 
+const LANGUAGE_KEY = 'simple-tools-language';
+
 class WideEvo {
     constructor() {
         this.queue = [];
@@ -106,7 +108,7 @@ class WideEvo {
     }
 
     getInitialLanguage() {
-        const saved = localStorage.getItem('wideEvoLang');
+        const saved = localStorage.getItem(LANGUAGE_KEY);
         if (saved === 'zh' || saved === 'en') return saved;
         return (navigator.language || 'en').toLowerCase().startsWith('zh') ? 'zh' : 'en';
     }
@@ -129,7 +131,7 @@ class WideEvo {
 
     toggleLanguage() {
         this.currentLang = this.currentLang === 'zh' ? 'en' : 'zh';
-        localStorage.setItem('wideEvoLang', this.currentLang);
+        localStorage.setItem(LANGUAGE_KEY, this.currentLang);
         this.applyLanguage();
     }
 
@@ -178,7 +180,7 @@ class WideEvo {
                     <div class="meta">${this.formatSize(item.file.size)}</div>
                 </div>
                 <span class="status ${item.status}">${this.getStatusText(item.status)}</span>
-                <button class="remove" onclick="app.removeFromQueue(${item.id})">×</button>
+                <button class="remove" onclick="app.removeFromQueue(${item.id})" ${this.processing ? 'disabled' : ''}>×</button>
             </div>
         `).join('');
     }
@@ -200,6 +202,7 @@ class WideEvo {
     }
     
     removeFromQueue(id) {
+        if (this.processing) return;
         const item = this.queue.find(item => item.id === id);
         if (item) URL.revokeObjectURL(item.preview);
         this.queue = this.queue.filter(item => item.id !== id);
@@ -208,6 +211,7 @@ class WideEvo {
     }
     
     clearQueue() {
+        if (this.processing) return;
         this.queue.forEach(item => URL.revokeObjectURL(item.preview));
         this.results.forEach(result => URL.revokeObjectURL(result.preview));
         this.queue = [];
@@ -227,6 +231,7 @@ class WideEvo {
         
         this.processing = true;
         this.processBtn.disabled = true;
+        this.clearBtn.disabled = true;
         this.processBtn.textContent = this.t('processingAll');
         
         const prefix = this.prefixInput.value || 'DSCF';
@@ -255,7 +260,9 @@ class WideEvo {
         this.renderResults();
         this.processing = false;
         this.processBtn.disabled = false;
+        this.clearBtn.disabled = false;
         this.processBtn.textContent = this.t('processAll');
+        this.renderQueue();
     }
     
     async processImage(file, prefix, index) {
