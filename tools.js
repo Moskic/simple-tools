@@ -21,6 +21,13 @@ const tools = [
     url: "./iracing_safety_rating_estimator/",
   },
   {
+    name: "iRacing iRating Calculator",
+    nameZh: "iRacing iRating 计算器",
+    description: "Estimate every driver's post-race iRating change with the community's common multiplayer Elo approximation.",
+    descriptionZh: "按社区常用的多人 Elo 近似公式，根据同组车手赛前 iR 和最终名次估算赛后分数变化。",
+    url: "./iracing_irating_calculator/",
+  },
+  {
     name: "Base64 Encoder & Decoder",
     nameZh: "Base64 编码与解码",
     description: "Encode text as Base64 or decode Base64 back to readable text, entirely in your browser.",

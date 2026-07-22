@@ -7,6 +7,7 @@ A lightweight and practical collection of online web tools. The project is built
 - **Steam Market Ratio Calculator**：Calculates Steam Market sale proceeds, transaction fees, and listing price ratios.
 - **WIDE Evo Print Quality Unlock**：Processes photos locally in the browser and generates files suitable for printing from a WIDE Evo TF card.
 - **iRacing Safety Rating Risk Estimator**：Estimates Safety Rating risk based on licence class, session type, number of laps, and incident points.
+- **iRacing iRating Calculator**：Estimates post-race iRating changes from the class field's ratings and final classification using the common community Elo approximation.
 - **Base64 Encoder & Decoder**：Encodes and decodes Base64 text locally in the browser.
 
 ## Running Locally
@@ -35,6 +36,7 @@ simple-tools/
 ├── steam_ratio_calculator/
 ├── wide_evo_print_quality_unlock/
 ├── iracing_safety_rating_estimator/
+├── iracing_irating_calculator/
 └── base64_encode_decode/
 ```
 

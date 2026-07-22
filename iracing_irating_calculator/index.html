@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="按社区常用的多人 Elo 近似公式，估算 iRacing 正式比赛后的 iRating 变化。"
+    />
+    <title>iRacing iRating 计算器 | moskic.com</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="../" aria-label="Simple Tools 首页">Simple Tools</a>
+        <button class="lang-switch" id="langSwitch" type="button">EN</button>
+      </header>
+
+      <main class="container">
+        <section class="card intro-card" aria-labelledby="pageTitle">
+          <h1 id="pageTitle" data-i18n="title">iRacing iRating 计算器</h1>
+          <p class="note" data-i18n="intro">
+            按最终分类顺序填写同组车手及赛前 iRating，估算每位车手的分数变化。所有计算均在浏览器本地完成。
+          </p>
+        </section>
+
+        <section class="card" aria-labelledby="fieldTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="fieldTitle" data-i18n="fieldTitle">完赛顺序与赛前 iR</h2>
+              <p class="helper section-helper" data-i18n="fieldHelp">
+                每行就是最终分类中的一个名次。多级别比赛请只填写与你同级别的车手。
+              </p>
+            </div>
+            <span class="field-count" id="fieldCount" aria-live="polite"></span>
+          </div>
+
+          <div class="table-scroll roster-scroll" tabindex="0">
+            <table class="roster-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="positionHeader">名次</th>
+                  <th scope="col" data-i18n="driverHeader">车手</th>
+                  <th scope="col" data-i18n="ratingHeader">赛前 iR</th>
+                  <th scope="col" data-i18n="meHeader">我的车手</th>
+                  <th scope="col" data-i18n="orderHeader">调整</th>
+                  <th scope="col"><span class="sr-only" data-i18n="removeHeader">删除</span></th>
+                </tr>
+              </thead>
+              <tbody id="driverRows"></tbody>
+            </table>
+          </div>
+
+          <p class="form-error" id="formError" role="alert" aria-live="assertive"></p>
+          <div class="actions">
+            <button class="button primary" id="calculateButton" type="button" data-i18n="calculate">计算 iR 变化</button>
+            <button class="button" id="addButton" type="button" data-i18n="addDriver">添加车手</button>
+            <button class="button quiet" id="exampleButton" type="button" data-i18n="restoreExample">恢复示例</button>
+          </div>
+          <p class="note compact" data-i18n="classificationNote">
+            退赛或拖车后，按比赛结果页最终列出的分类名次填写；起步位置、圈速和事故点不参与此估算。
+          </p>
+        </section>
+
+        <div class="primary-grid">
+          <section class="card results-card" aria-labelledby="resultTitle">
+            <h2 id="resultTitle" data-i18n="resultTitle">我的估算结果</h2>
+            <div class="results" aria-live="polite">
+              <div class="metric">
+                <span class="metric-name" data-i18n="changeName">预计变化</span>
+                <strong class="metric-value" id="selectedChange">—</strong>
+                <span class="metric-hint" data-i18n="changeHint">按整数显示，官方结果可能相差约 1 iR。</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="newRatingName">预计新 iR</span>
+                <strong class="metric-value" id="selectedNewRating">—</strong>
+                <span class="metric-hint" data-i18n="newRatingHint">赛前 iR 加上预计变化。</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="sofName">本组 SoF</span>
+                <strong class="metric-value" id="strengthOfField">—</strong>
+                <span class="metric-hint" data-i18n="sofHint">使用社区常见的指数平均公式估算。</span>
+              </div>
+              <div class="metric">
+                <span class="metric-name" data-i18n="breakEvenName">大致保本名次</span>
+                <strong class="metric-value" id="breakEvenPosition">—</strong>
+                <span class="metric-hint" data-i18n="breakEvenHint">最接近 0 iR 变化的完赛位置。</span>
+              </div>
+            </div>
+            <div class="status-box" id="statusBox" aria-live="polite" data-i18n="initialStatus">
+              填写车手后即可计算。
+            </div>
+            <div class="pill-row" id="quickTips" aria-label="计算摘要"></div>
+          </section>
+
+          <section class="card" aria-labelledby="summaryTitle">
+            <h2 id="summaryTitle" data-i18n="summaryTitle">计算口径</h2>
+            <ul class="explain-list" id="summaryList"></ul>
+          </section>
+        </div>
+
+        <section class="card" aria-labelledby="allResultsTitle">
+          <div class="section-heading compact-heading">
+            <div>
+              <h2 id="allResultsTitle" data-i18n="allResultsTitle">全场估算</h2>
+              <p class="helper section-helper" data-i18n="allResultsHelp">变化值取整前全场总和为 0；逐人取整后可能出现少量尾差。</p>
+            </div>
+          </div>
+          <div class="table-scroll" tabindex="0">
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="positionHeader">名次</th>
+                  <th scope="col" data-i18n="driverHeader">车手</th>
+                  <th scope="col" data-i18n="ratingHeader">赛前 iR</th>
+                  <th scope="col" data-i18n="expectedHeader">预期名次</th>
+                  <th scope="col" data-i18n="changeHeader">预计变化</th>
+                  <th scope="col" data-i18n="newRatingHeader">预计新 iR</th>
+                </tr>
+              </thead>
+              <tbody id="resultRows"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="reference-grid">
+          <section class="card" aria-labelledby="formulaTitle">
+            <h2 id="formulaTitle" data-i18n="formulaTitle">社区近似公式</h2>
+            <div class="formula-block" aria-label="iRating 近似计算公式">
+              <code>ΔRᵢ = 200 × (Aᵢ − Eᵢ)</code>
+              <code>Eᵢⱼ = 1 ÷ (1 + 2<sup>(Rⱼ − Rᵢ) ÷ 1600</sup>)</code>
+            </div>
+            <p class="note compact" data-i18n="formulaNote">
+              A 是实际击败对手的比例，E 是根据双方 iR 推算的平均预期胜率。等价于你与同组每位车手分别进行一次 Elo 比较，再按对手数量归一化。
+            </p>
+          </section>
+
+          <section class="card" aria-labelledby="usageTitle">
+            <h2 id="usageTitle" data-i18n="usageTitle">使用边界</h2>
+            <div class="usage-copy" id="usageCopy"></div>
+          </section>
+        </div>
+
+        <section class="card disclaimer-card">
+          <p class="note compact" data-i18n="disclaimer">
+            非官方估算工具。公式来自社区长期反向推算，通常很接近正式结算，但 iRacing 没有公开精确算法；隐藏小数、未发车及特殊赛事规则都可能造成偏差。
+          </p>
+        </section>
+      </main>
+
+      <footer class="site-footer" aria-label="Site footer">
+        <span class="footer-site-name">iRacing iRating Calculator</span>
+        <span aria-hidden="true">/</span>
+        <a href="https://moskic.com">moskic.com</a>
+        <span aria-hidden="true">/</span>
+        <span id="footerYear"></span>
+        <span aria-hidden="true">/</span>
+        <time id="footerTime"></time>
+      </footer>
+    </div>
+  </body>
+</html>
