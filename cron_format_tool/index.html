@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="在浏览器本地生成、校验并解释标准五段 Unix Cron 表达式。"
+    />
+    <title>Cron 表达式工具 | moskic.com</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="../" aria-label="Simple Tools 首页">Simple Tools</a>
+        <button class="lang-switch" id="langSwitch" type="button">EN</button>
+      </header>
+
+      <main class="container">
+        <section class="card intro-card" aria-labelledby="pageTitle">
+          <h1 id="pageTitle" data-i18n="title">Cron 表达式工具</h1>
+          <p class="note" data-i18n="intro">
+            生成、校验并解释标准五段 Unix Cron 表达式，预览接下来的执行时间。所有计算均在浏览器本地完成。
+          </p>
+        </section>
+
+        <section class="card expression-card" aria-labelledby="expressionTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="expressionTitle" data-i18n="expressionTitle">Cron 表达式</h2>
+              <p class="helper" data-i18n="expressionHelp">格式：分钟 小时 日期 月份 星期</p>
+            </div>
+            <button class="text-button" id="copyButton" type="button" data-i18n="copy">复制表达式</button>
+          </div>
+          <input
+            class="expression-input"
+            id="expression"
+            type="text"
+            value="0 9 * * 1-5"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-labelledby="expressionTitle"
+            aria-describedby="validationStatus"
+          />
+          <p class="validation-status" id="validationStatus" role="status" aria-live="polite"></p>
+        </section>
+
+        <section class="card quick-builder-card" aria-labelledby="quickBuilderTitle">
+          <div class="section-heading">
+            <div>
+              <h2 id="quickBuilderTitle" data-i18n="quickBuilderTitle">快速生成</h2>
+              <p class="helper" data-i18n="quickBuilderHelp">选择执行频率，表达式会自动同步。</p>
+            </div>
+          </div>
+          <div class="builder-grid">
+            <div class="field builder-type">
+              <label for="scheduleType" data-i18n="scheduleType">执行频率</label>
+              <select id="scheduleType">
+                <option value="minutes" data-i18n="typeMinutes">每隔若干分钟</option>
+                <option value="hours" data-i18n="typeHours">每隔若干小时</option>
+                <option value="daily" data-i18n="typeDaily">每天</option>
+                <option value="weekly" data-i18n="typeWeekly" selected>每周</option>
+                <option value="monthly" data-i18n="typeMonthly">每月</option>
+                <option value="custom" data-i18n="typeCustom">自定义</option>
+              </select>
+            </div>
+
+            <div class="field builder-control" id="intervalControl" hidden>
+              <label for="intervalValue" data-i18n="interval">间隔</label>
+              <div class="input-suffix">
+                <input id="intervalValue" type="number" min="1" max="59" value="20" />
+                <span id="intervalUnit"></span>
+              </div>
+            </div>
+
+            <div class="field builder-control" id="timeControl">
+              <label for="runTime" data-i18n="runTime">执行时间</label>
+              <input id="runTime" type="time" value="09:00" />
+            </div>
+
+            <div class="field builder-control" id="weekdayControl">
+              <label for="weekdaySelect" data-i18n="weekdaySelect">星期</label>
+              <select id="weekdaySelect">
+                <option value="1-5" data-i18n="weekdayWorkdays" selected>周一至周五</option>
+                <option value="0,6" data-i18n="weekdayWeekend">周末</option>
+                <option value="1" data-i18n="weekdayMonday">星期一</option>
+                <option value="2" data-i18n="weekdayTuesday">星期二</option>
+                <option value="3" data-i18n="weekdayWednesday">星期三</option>
+                <option value="4" data-i18n="weekdayThursday">星期四</option>
+                <option value="5" data-i18n="weekdayFriday">星期五</option>
+                <option value="6" data-i18n="weekdaySaturday">星期六</option>
+                <option value="0" data-i18n="weekdaySunday">星期日</option>
+              </select>
+            </div>
+
+            <div class="field builder-control" id="monthDayControl" hidden>
+              <label for="monthDayValue" data-i18n="monthDay">每月日期</label>
+              <input id="monthDayValue" type="number" min="1" max="31" value="1" />
+            </div>
+          </div>
+          <p class="note compact" id="builderHint" data-i18n="builderHint">
+            需要列表、范围或更复杂的规则时，可继续使用下方字段编辑。
+          </p>
+        </section>
+
+        <div class="primary-grid">
+          <section class="card" aria-labelledby="fieldsTitle">
+            <h2 id="fieldsTitle" data-i18n="fieldsTitle">高级字段编辑</h2>
+            <div class="field-grid">
+              <div class="field">
+                <label for="minute" data-i18n="minute">分钟</label>
+                <input id="minute" type="text" value="0" inputmode="text" spellcheck="false" />
+                <span class="field-range">0–59</span>
+              </div>
+              <div class="field">
+                <label for="hour" data-i18n="hour">小时</label>
+                <input id="hour" type="text" value="9" inputmode="text" spellcheck="false" />
+                <span class="field-range">0–23</span>
+              </div>
+              <div class="field">
+                <label for="dayOfMonth" data-i18n="dayOfMonth">日期</label>
+                <input id="dayOfMonth" type="text" value="*" inputmode="text" spellcheck="false" />
+                <span class="field-range">1–31</span>
+              </div>
+              <div class="field">
+                <label for="month" data-i18n="month">月份</label>
+                <input id="month" type="text" value="*" inputmode="text" spellcheck="false" />
+                <span class="field-range">1–12</span>
+              </div>
+              <div class="field">
+                <label for="dayOfWeek" data-i18n="dayOfWeek">星期</label>
+                <input id="dayOfWeek" type="text" value="1-5" inputmode="text" spellcheck="false" />
+                <span class="field-range">0–7</span>
+              </div>
+            </div>
+            <p class="note compact" data-i18n="sundayNote">星期字段中 0 和 7 都表示星期日。</p>
+          </section>
+
+          <section class="card result-card" aria-labelledby="resultTitle">
+            <h2 id="resultTitle" data-i18n="resultTitle">表达式含义</h2>
+            <div class="explanation" id="explanation" aria-live="polite"></div>
+            <div class="timezone-row">
+              <span data-i18n="timezone">使用当前时区</span>
+              <strong id="timezoneName"></strong>
+            </div>
+          </section>
+        </div>
+
+        <section class="card" aria-labelledby="presetsTitle">
+          <h2 id="presetsTitle" data-i18n="presetsTitle">常用预设</h2>
+          <div class="preset-grid" id="presetGrid"></div>
+        </section>
+
+        <div class="reference-grid">
+          <section class="card" aria-labelledby="nextRunsTitle">
+            <h2 id="nextRunsTitle" data-i18n="nextRunsTitle">接下来 5 次执行</h2>
+            <ol class="next-runs" id="nextRuns" aria-live="polite"></ol>
+          </section>
+
+          <section class="card" aria-labelledby="syntaxTitle">
+            <h2 id="syntaxTitle" data-i18n="syntaxTitle">语法速查</h2>
+            <dl class="syntax-list">
+              <div><dt><code>*</code></dt><dd data-i18n="syntaxAny">任意值</dd></div>
+              <div><dt><code>,</code></dt><dd data-i18n="syntaxList">多个值，例如 1,3,5</dd></div>
+              <div><dt><code>-</code></dt><dd data-i18n="syntaxRange">范围，例如 1-5</dd></div>
+              <div><dt><code>/</code></dt><dd data-i18n="syntaxStep">步长，例如 */10</dd></div>
+            </dl>
+            <p class="note compact" data-i18n="unixNote">
+              本工具使用五段 Unix Cron，不支持 Quartz 的秒、年份、?、L、W 和 #。
+            </p>
+            <p class="note compact" data-i18n="dayRule">
+              当日期和星期都不是 * 时，传统 Cron 会在任一字段匹配时执行。
+            </p>
+          </section>
+        </div>
+      </main>
+
+      <footer class="site-footer" aria-label="Site footer">
+        <span class="footer-site-name">Cron Expression Tool</span>
+        <span aria-hidden="true">/</span>
+        <a href="https://moskic.com">moskic.com</a>
+        <span aria-hidden="true">/</span>
+        <span id="footerYear"></span>
+        <span aria-hidden="true">/</span>
+        <time id="footerTime"></time>
+      </footer>
+    </div>
+  </body>
+</html>

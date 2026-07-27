@@ -34,6 +34,13 @@ const tools = [
     descriptionZh: "在浏览器本地将文本编码为 Base64，或将 Base64 解码为可读文本。",
     url: "./base64_encode_decode/",
   },
+  {
+    name: "Cron Expression Tool",
+    nameZh: "Cron 表达式工具",
+    description: "Build, validate, and explain five-field Unix Cron expressions, then preview upcoming runs.",
+    descriptionZh: "生成、校验并解释五段 Unix Cron 表达式，同时预览接下来的执行时间。",
+    url: "./cron_format_tool/",
+  },
 ];
 
 const toolGrid = document.querySelector("#tool-grid");

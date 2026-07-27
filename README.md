@@ -9,6 +9,7 @@ A lightweight and practical collection of online web tools. The project is built
 - **iRacing Safety Rating Risk Estimator**：Estimates Safety Rating risk based on licence class, session type, number of laps, and incident points.
 - **iRacing iRating Calculator**：Estimates post-race iRating changes from the class field's ratings and final classification using the common community Elo approximation.
 - **Base64 Encoder & Decoder**：Encodes and decodes Base64 text locally in the browser.
+- **Cron Expression Tool**：Builds, validates, and explains five-field Unix Cron expressions and previews upcoming runs.
 
 ## Running Locally
 
@@ -37,7 +38,8 @@ simple-tools/
 ├── wide_evo_print_quality_unlock/
 ├── iracing_safety_rating_estimator/
 ├── iracing_irating_calculator/
-└── base64_encode_decode/
+├── base64_encode_decode/
+└── cron_format_tool/
 ```
 
 ## Adding a New Tool
