@@ -104,12 +104,20 @@ const translations = {
     weekdaySaturday: "星期六",
     everyNMinutesExplain: "每 {interval} 分钟执行一次。",
     everyNHoursExplain: "每 {interval} 小时执行一次，均在整点运行。",
+    hourlyAtMinuteExplain: "每小时的第 {minute} 分钟执行。",
+    hourlyAtMinutesExplain: "每小时的第 {minutes} 分钟执行。",
+    dailyDuringHourExplain: "每天 {hour}:00–{hour}:59，每分钟执行一次。",
+    monthlyOnDayExplain: "每月 {day} 日全天每分钟执行一次。",
+    monthlyHourlyAtMinuteExplain: "每月 {day} 日每小时的第 {minute} 分钟执行。",
+    yearlyDuringMonthExplain: "每年 {month} 月内每分钟执行一次。",
+    yearlyDailyAtExplain: "每年 {month} 月每天 {time} 执行。",
+    weeklyAllDayExplain: "{weekday}全天每分钟执行一次。",
+    weeklyHourlyExplain: "{weekday}每小时整点执行。",
+    weekdayHoursIntervalExplain: "{weekday} {start}:00–{end}:59，每 {interval} 分钟执行一次。",
+    dayOrWeekdayAtExplain: "每月 {day} 日或{weekday} {time} 执行。",
     dailyAtExplain: "每天 {time} 执行。",
-    weeklyAtExplain: "每周{weekday} {time} 执行。",
-    monthlyAtExplain: "每月 {day} 日 {time} 执行。",
-    fieldSummary: "{field}：{value}",
-    summaryJoin: "；",
-    orDayRule: "日期和星期任一匹配时都会执行。"
+    weeklyAtExplain: "{weekday} {time} 执行。",
+    monthlyAtExplain: "每月 {day} 日 {time} 执行。"
   },
   en: {
     pageTitle: "Cron Expression Tool | moskic.com",
@@ -199,12 +207,20 @@ const translations = {
     weekdaySaturday: "Saturday",
     everyNMinutesExplain: "Runs every {interval} minutes.",
     everyNHoursExplain: "Runs every {interval} hours on the hour.",
+    hourlyAtMinuteExplain: "Runs at minute {minute} of every hour.",
+    hourlyAtMinutesExplain: "Runs at minutes {minutes} of every hour.",
+    dailyDuringHourExplain: "Runs every minute from {hour}:00 through {hour}:59 every day.",
+    monthlyOnDayExplain: "Runs every minute on day {day} of every month.",
+    monthlyHourlyAtMinuteExplain: "Runs at minute {minute} of every hour on day {day} of every month.",
+    yearlyDuringMonthExplain: "Runs every minute during month {month} of every year.",
+    yearlyDailyAtExplain: "Runs every day at {time} during month {month} of every year.",
+    weeklyAllDayExplain: "Runs every minute on {weekday}.",
+    weeklyHourlyExplain: "Runs at the start of every hour, {weekday}.",
+    weekdayHoursIntervalExplain: "Runs every {interval} minutes from {start}:00 through {end}:59, {weekday}.",
+    dayOrWeekdayAtExplain: "Runs at {time} on day {day} of every month or on {weekday}.",
     dailyAtExplain: "Runs every day at {time}.",
-    weeklyAtExplain: "Runs every {weekday} at {time}.",
-    monthlyAtExplain: "Runs on day {day} of every month at {time}.",
-    fieldSummary: "{field}: {value}",
-    summaryJoin: "; ",
-    orDayRule: "Runs when either the day or weekday matches."
+    weeklyAtExplain: "Runs on {weekday} at {time}.",
+    monthlyAtExplain: "Runs on day {day} of every month at {time}."
   }
 };
 
@@ -238,7 +254,7 @@ function getInitialLanguage() {
 function t(key, replacements = {}) {
   let text = translations[currentLanguage][key] || key;
   Object.entries(replacements).forEach(([name, value]) => {
-    text = text.replace(`{${name}}`, value);
+    text = text.split(`{${name}}`).join(value);
   });
   return text;
 }
@@ -392,6 +408,29 @@ function weekdayName(value) {
   return t(names[value === 7 ? 0 : value]);
 }
 
+function describeWeekdaySchedule(source) {
+  const parts = source.split(",").map((part) => {
+    if (/^\d+$/.test(part)) {
+      const name = weekdayName(Number(part));
+      return currentLanguage === "zh" ? `周${name}` : name;
+    }
+
+    const range = part.match(/^(\d+)-(\d+)$/);
+    if (range) {
+      const start = weekdayName(Number(range[1]));
+      const end = weekdayName(Number(range[2]));
+      return currentLanguage === "zh" ? `周${start}至周${end}` : `${start} through ${end}`;
+    }
+
+    return describeField(part, FIELD_DEFINITIONS[4]);
+  });
+
+  if (currentLanguage === "zh") return `每${parts.join("、")}`;
+  if (parts.length < 2) return parts[0];
+  if (parts.length === 2) return parts.join(" and ");
+  return `${parts.slice(0, -1).join(", ")}, and ${parts[parts.length - 1]}`;
+}
+
 function describeField(source, definition) {
   if (source === "*") return t(`any${definition.id[0].toUpperCase()}${definition.id.slice(1)}`);
 
@@ -436,6 +475,226 @@ function describeField(source, definition) {
   return formatValue(source);
 }
 
+function explainComposedExpression(fields) {
+  const [minuteField, hourField, dayField, monthField, weekdayField] = fields;
+  const list = (items) => {
+    if (currentLanguage === "zh") return items.join("、");
+    if (items.length < 2) return items[0];
+    if (items.length === 2) return items.join(" and ");
+    return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+  };
+  const values = (field) => [...field.values].sort((left, right) => left - right);
+  const selection = (field) => {
+    const range = field.source.match(/^(\d+)-(\d+)$/);
+    if (range) {
+      return currentLanguage === "zh"
+        ? `${range[1]} 至 ${range[2]}`
+        : `${range[1]} through ${range[2]}`;
+    }
+    return list(values(field).map(String));
+  };
+
+  const minute = minuteField.source;
+  const hour = hourField.source;
+  const fixedMinute = /^\d+$/.test(minute);
+  const fixedHour = /^\d+$/.test(hour);
+  const minuteInterval = minute.match(/^\*\/(\d+)$/);
+  const offsetMinuteInterval = minute.match(/^(\d+)\/(\d+)$/);
+  const minuteRange = minute.match(/^(\d+)-(\d+)$/);
+  const minuteRangeInterval = minute.match(/^(\d+)-(\d+)\/(\d+)$/);
+  let time;
+
+  if (currentLanguage === "zh") {
+    let hourDescription;
+    if (fixedHour) {
+      hourDescription = `${hour} 时`;
+    } else {
+      const hourRange = hour.match(/^(\d+)-(\d+)$/);
+      const hourInterval = hour.match(/^\*\/(\d+)$/);
+      const offsetHourInterval = hour.match(/^(\d+)\/(\d+)$/);
+      const hourRangeInterval = hour.match(/^(\d+)-(\d+)\/(\d+)$/);
+      if (hourRange) {
+        hourDescription = `${hourRange[1]} 至 ${hourRange[2]} 时`;
+      } else if (hourInterval) {
+        hourDescription = `从 0 时起每隔 ${hourInterval[1]} 小时`;
+      } else if (offsetHourInterval) {
+        hourDescription = `从 ${offsetHourInterval[1]} 时起每隔 ${offsetHourInterval[2]} 小时`;
+      } else if (hourRangeInterval) {
+        hourDescription =
+          `${hourRangeInterval[1]} 至 ${hourRangeInterval[2]} 时内每隔 ` +
+          `${hourRangeInterval[3]} 小时`;
+      } else if (hour !== "*") {
+        hourDescription = `${selection(hourField)} 时`;
+      }
+    }
+
+    if (hour === "*" && minute === "*") {
+      time = "每分钟执行一次";
+    } else if (hour === "*" && fixedMinute) {
+      time = `每小时的第 ${minute} 分钟执行`;
+    } else if (hour === "*" && minuteInterval) {
+      time = `每隔 ${minuteInterval[1]} 分钟执行一次`;
+    } else if (hour === "*" && offsetMinuteInterval) {
+      time = `每小时从第 ${offsetMinuteInterval[1]} 分钟起每隔 ` +
+        `${offsetMinuteInterval[2]} 分钟执行`;
+    } else if (hour === "*" && minuteRange) {
+      time = `每小时的第 ${minuteRange[1]} 至 ${minuteRange[2]} 分钟内每分钟执行`;
+    } else if (hour === "*" && minuteRangeInterval) {
+      time =
+        `每小时的第 ${minuteRangeInterval[1]} 至 ${minuteRangeInterval[2]} 分钟内每隔 ` +
+        `${minuteRangeInterval[3]} 分钟执行`;
+    } else if (hour === "*") {
+      time = `每小时的第 ${selection(minuteField)} 分钟执行`;
+    } else if (minute === "*") {
+      time = `${hourDescription}内每分钟执行`;
+    } else if (fixedMinute) {
+      time = `${hourDescription}的第 ${minute} 分钟执行`;
+    } else if (minuteInterval) {
+      time = `${hourDescription}内每隔 ${minuteInterval[1]} 分钟执行`;
+    } else if (offsetMinuteInterval) {
+      time = `${hourDescription}内从第 ${offsetMinuteInterval[1]} 分钟起每隔 ` +
+        `${offsetMinuteInterval[2]} 分钟执行`;
+    } else if (minuteRange) {
+      time = `${hourDescription}的第 ${minuteRange[1]} 至 ${minuteRange[2]} 分钟内每分钟执行`;
+    } else if (minuteRangeInterval) {
+      time =
+        `${hourDescription}的第 ${minuteRangeInterval[1]} 至 ${minuteRangeInterval[2]} 分钟内` +
+        `每隔 ${minuteRangeInterval[3]} 分钟执行`;
+    } else {
+      time = `${hourDescription}的第 ${selection(minuteField)} 分钟执行`;
+    }
+  } else {
+    let hourDescription;
+    if (fixedHour) {
+      hourDescription = `hour ${hour}`;
+    } else {
+      const hourRange = hour.match(/^(\d+)-(\d+)$/);
+      const hourInterval = hour.match(/^\*\/(\d+)$/);
+      const offsetHourInterval = hour.match(/^(\d+)\/(\d+)$/);
+      const hourRangeInterval = hour.match(/^(\d+)-(\d+)\/(\d+)$/);
+      if (hourRange) {
+        hourDescription = `hours ${hourRange[1]} through ${hourRange[2]}`;
+      } else if (hourInterval) {
+        hourDescription = `every ${hourInterval[1]} hours starting at hour 0`;
+      } else if (offsetHourInterval) {
+        hourDescription =
+          `every ${offsetHourInterval[2]} hours starting at hour ${offsetHourInterval[1]}`;
+      } else if (hourRangeInterval) {
+        hourDescription =
+          `every ${hourRangeInterval[3]} hours from hour ${hourRangeInterval[1]} ` +
+          `through ${hourRangeInterval[2]}`;
+      } else if (hour !== "*") {
+        hourDescription = `hours ${selection(hourField)}`;
+      }
+    }
+
+    if (hour === "*" && minute === "*") {
+      time = "every minute";
+    } else if (hour === "*" && fixedMinute) {
+      time = `at minute ${minute} of every hour`;
+    } else if (hour === "*" && minuteInterval) {
+      time = `every ${minuteInterval[1]} minutes`;
+    } else if (hour === "*" && offsetMinuteInterval) {
+      time =
+        `every ${offsetMinuteInterval[2]} minutes starting at minute ` +
+        `${offsetMinuteInterval[1]} of each hour`;
+    } else if (hour === "*" && minuteRange) {
+      time = `every minute from minute ${minuteRange[1]} through ${minuteRange[2]} of each hour`;
+    } else if (hour === "*" && minuteRangeInterval) {
+      time =
+        `every ${minuteRangeInterval[3]} minutes from minute ${minuteRangeInterval[1]} ` +
+        `through ${minuteRangeInterval[2]} of each hour`;
+    } else if (hour === "*") {
+      time = `at minutes ${selection(minuteField)} of every hour`;
+    } else if (minute === "*") {
+      time = `every minute during ${hourDescription}`;
+    } else if (fixedMinute) {
+      time = `at minute ${minute} during ${hourDescription}`;
+    } else if (minuteInterval) {
+      time = `every ${minuteInterval[1]} minutes during ${hourDescription}`;
+    } else if (offsetMinuteInterval) {
+      time =
+        `every ${offsetMinuteInterval[2]} minutes starting at minute ` +
+        `${offsetMinuteInterval[1]} during ${hourDescription}`;
+    } else if (minuteRange) {
+      time = `every minute from minute ${minuteRange[1]} through ${minuteRange[2]} during ${hourDescription}`;
+    } else if (minuteRangeInterval) {
+      time =
+        `every ${minuteRangeInterval[3]} minutes from minute ${minuteRangeInterval[1]} ` +
+        `through ${minuteRangeInterval[2]} during ${hourDescription}`;
+    } else {
+      time = `at minutes ${selection(minuteField)} during ${hourDescription}`;
+    }
+  }
+
+  const day = dayField.source;
+  const month = monthField.source;
+  const weekday = weekdayField.source;
+  const hasDay = day !== "*";
+  const hasMonth = month !== "*";
+  const hasWeekday = weekday !== "*";
+  if (!hasDay && !hasMonth && !hasWeekday) {
+    return currentLanguage === "zh" ? `${time}。` : `Runs ${time}.`;
+  }
+
+  const daySelection = hasDay ? selection(dayField) : "";
+  const monthSelection = hasMonth ? selection(monthField) : "";
+  let weekdaySchedule = "";
+  if (hasWeekday) {
+    if (/^[\d,-]+$/.test(weekday)) {
+      weekdaySchedule = describeWeekdaySchedule(weekday);
+    } else {
+      const names = values(weekdayField).map((value) => {
+        const name = weekdayName(value);
+        return currentLanguage === "zh" ? `周${name}` : name;
+      });
+      weekdaySchedule = currentLanguage === "zh" ? `每${list(names)}` : list(names);
+    }
+  }
+
+  if (currentLanguage === "zh") {
+    let calendar;
+    if (!hasMonth && hasDay && hasWeekday) {
+      calendar = `每月 ${daySelection} 日或${weekdaySchedule}`;
+    } else if (!hasMonth && hasDay) {
+      calendar = `每月 ${daySelection} 日`;
+    } else if (!hasMonth) {
+      calendar = weekdaySchedule;
+    } else if (hasDay && hasWeekday) {
+      calendar =
+        `每年 ${monthSelection} 月内，日期为 ${daySelection} 日或星期为` +
+        `${weekdaySchedule.replace(/^每/, "")}时`;
+    } else if (hasDay) {
+      calendar = `每年 ${monthSelection} 月的 ${daySelection} 日`;
+    } else if (hasWeekday) {
+      calendar = `每年 ${monthSelection} 月内的${weekdaySchedule}`;
+    } else {
+      calendar = `每年 ${monthSelection} 月内`;
+    }
+    return `${calendar}，${time}。`;
+  }
+
+  let calendar;
+  if (!hasMonth && hasDay && hasWeekday) {
+    calendar = ` on day ${daySelection} of every month or on ${weekdaySchedule}`;
+  } else if (!hasMonth && hasDay) {
+    calendar = ` on day ${daySelection} of every month`;
+  } else if (!hasMonth) {
+    calendar = ` on ${weekdaySchedule}`;
+  } else if (hasDay && hasWeekday) {
+    calendar =
+      ` on day ${daySelection} or on ${weekdaySchedule} during month ` +
+      `${monthSelection} of every year`;
+  } else if (hasDay) {
+    calendar = ` on day ${daySelection} of month ${monthSelection} every year`;
+  } else if (hasWeekday) {
+    calendar = ` on ${weekdaySchedule} during month ${monthSelection} of every year`;
+  } else {
+    calendar = ` during month ${monthSelection} of every year`;
+  }
+  return `Runs ${time}${calendar}.`;
+}
+
 function explainExpression(expression, fields) {
   const preset = PRESETS.find((item) => item.expression === expression);
   if (preset) return t(`${preset.key}Explain`);
@@ -446,40 +705,134 @@ function explainExpression(expression, fields) {
     return t("everyNMinutesExplain", { interval: minuteInterval[1] });
   }
 
+  const offsetMinuteInterval = sources[0].match(/^(\d+)\/\d+$/);
+  if (offsetMinuteInterval && sources.slice(1).every((source) => source === "*")) {
+    const minuteValues = [...fields[0].values].sort((left, right) => left - right);
+    if (minuteValues.length === 1) {
+      return t("hourlyAtMinuteExplain", { minute: minuteValues[0] });
+    }
+    let minutes = minuteValues.join(currentLanguage === "zh" ? "、" : ", ");
+    if (currentLanguage === "en" && minuteValues.length === 2) {
+      minutes = minuteValues.join(" and ");
+    } else if (currentLanguage === "en") {
+      minutes = `${minuteValues.slice(0, -1).join(", ")}, and ${minuteValues[minuteValues.length - 1]}`;
+    }
+    return t("hourlyAtMinutesExplain", { minutes });
+  }
+
+  if (/^\d+$/.test(sources[0]) && sources.slice(1).every((source) => source === "*")) {
+    return t("hourlyAtMinuteExplain", { minute: sources[0] });
+  }
+
+  if (
+    /^\d+$/.test(sources[1]) &&
+    sources[0] === "*" &&
+    sources.slice(2).every((source) => source === "*")
+  ) {
+    return t("dailyDuringHourExplain", { hour: String(sources[1]).padStart(2, "0") });
+  }
+
+  if (
+    /^\d+$/.test(sources[2]) &&
+    sources.slice(0, 2).every((source) => source === "*") &&
+    sources.slice(3).every((source) => source === "*")
+  ) {
+    return t("monthlyOnDayExplain", { day: sources[2] });
+  }
+
+  if (
+    /^\d+$/.test(sources[0]) &&
+    sources[1] === "*" &&
+    /^\d+$/.test(sources[2]) &&
+    sources.slice(3).every((source) => source === "*")
+  ) {
+    return t("monthlyHourlyAtMinuteExplain", {
+      day: sources[2],
+      minute: sources[0]
+    });
+  }
+
+  if (
+    /^\d+$/.test(sources[3]) &&
+    sources.slice(0, 3).every((source) => source === "*") &&
+    sources[4] === "*"
+  ) {
+    return t("yearlyDuringMonthExplain", { month: sources[3] });
+  }
+
+  if (/^[\d,-]+$/.test(sources[4]) && sources.slice(0, 4).every((source) => source === "*")) {
+    return t("weeklyAllDayExplain", {
+      weekday: describeWeekdaySchedule(sources[4])
+    });
+  }
+
+  if (
+    sources[0] === "0" &&
+    sources.slice(1, 4).every((source) => source === "*") &&
+    /^[\d,-]+$/.test(sources[4])
+  ) {
+    return t("weeklyHourlyExplain", {
+      weekday: describeWeekdaySchedule(sources[4])
+    });
+  }
+
   const hourInterval = sources[1].match(/^\*\/(\d+)$/);
   if (sources[0] === "0" && hourInterval && sources.slice(2).every((source) => source === "*")) {
     return t("everyNHoursExplain", { interval: hourInterval[1] });
   }
 
+  const hourRange = sources[1].match(/^(\d+)-(\d+)$/);
+  if (
+    minuteInterval &&
+    hourRange &&
+    sources[2] === "*" &&
+    sources[3] === "*" &&
+    /^[\d,-]+$/.test(sources[4])
+  ) {
+    return t("weekdayHoursIntervalExplain", {
+      weekday: describeWeekdaySchedule(sources[4]),
+      start: String(hourRange[1]).padStart(2, "0"),
+      end: String(hourRange[2]).padStart(2, "0"),
+      interval: minuteInterval[1]
+    });
+  }
+
   const fixedTime = /^\d+$/.test(sources[0]) && /^\d+$/.test(sources[1]);
-  if (fixedTime && sources[3] === "*") {
+  if (fixedTime) {
     const time = `${String(sources[1]).padStart(2, "0")}:${String(sources[0]).padStart(2, "0")}`;
-    if (sources[2] === "*" && sources[4] === "*") {
-      return t("dailyAtExplain", { time });
+    if (sources[3] === "*") {
+      if (sources[2] === "*" && sources[4] === "*") {
+        return t("dailyAtExplain", { time });
+      }
+      if (sources[2] === "*" && /^[\d,-]+$/.test(sources[4])) {
+        return t("weeklyAtExplain", {
+          weekday: describeWeekdaySchedule(sources[4]),
+          time
+        });
+      }
+      if (/^\d+$/.test(sources[2]) && sources[4] === "*") {
+        return t("monthlyAtExplain", {
+          day: describeField(sources[2], FIELD_DEFINITIONS[2]).replace(/\s*日$/, ""),
+          time
+        });
+      }
+      if (/^\d+$/.test(sources[2]) && /^[\d,-]+$/.test(sources[4])) {
+        return t("dayOrWeekdayAtExplain", {
+          day: sources[2],
+          weekday: describeWeekdaySchedule(sources[4]),
+          time
+        });
+      }
     }
-    if (sources[2] === "*" && sources[4] !== "*") {
-      return t("weeklyAtExplain", {
-        weekday: describeField(sources[4], FIELD_DEFINITIONS[4]),
-        time
-      });
-    }
-    if (sources[2] !== "*" && sources[4] === "*") {
-      return t("monthlyAtExplain", {
-        day: describeField(sources[2], FIELD_DEFINITIONS[2]).replace(/\s*日$/, ""),
+    if (sources[2] === "*" && /^\d+$/.test(sources[3]) && sources[4] === "*") {
+      return t("yearlyDailyAtExplain", {
+        month: sources[3],
         time
       });
     }
   }
 
-  const summaries = fields.map((field, index) => t("fieldSummary", {
-    field: fieldName(FIELD_DEFINITIONS[index]),
-    value: describeField(field.source, FIELD_DEFINITIONS[index])
-  }));
-  let result = summaries.join(t("summaryJoin"));
-  if (!fields[2].unrestricted && !fields[4].unrestricted) {
-    result += `${currentLanguage === "zh" ? "。" : ". "}${t("orDayRule")}`;
-  }
-  return result;
+  return explainComposedExpression(fields);
 }
 
 function renderResult() {
